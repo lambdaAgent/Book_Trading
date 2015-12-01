@@ -1,0 +1,30 @@
+<div ng-controller="HeaderCtrl" class="header">
+	<ul class="nav nav-pills pull-right">
+		<li ng-show="isAuthenticated()" ui-sref-active="active">
+			<a ui-sref="setting">Setting</a>
+		</li>
+		<li ui-sref-active="active">
+			<a ui-sref="books">All Book</a>
+		</li>
+		<li  ui-sref-active="active"><!-- ng-show="isAuthenticated()"-->
+			<a ui-sref="book">My Book</a>
+		</li>
+		<li ng-hide="isAuthenticated()" ui-sref-active="active">
+			<a ui-sref="login">Login</a>
+		</li>
+		<li ng-show="isAuthenticated()" ui-sref-active="active">
+			<a ui-sref="logout">Logout</a>
+		</li>
+	</ul>
+	<h3 class="text-muted"><a ui-sref="main">BookLog</a></h3>
+</div>
+
+
+
+
+
+
+
+
+
+

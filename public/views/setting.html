@@ -1,0 +1,20 @@
+    <div class="row">
+        <div ng-include="'views/alert.html'"></div>
+    </div>
+    <br/>
+
+<div class="container">
+	<div class="animate-if">
+	  <form class="">
+	    <h2 class="form-signin-heading">Change Password</h2>
+	    <label for="inputName" class="">Current Password</label>
+	    <input type="text"  ng-model="current_password" class="form-control" placeholder="Current Password">
+	    
+	    <label for="options1" class="">New Password</label>
+	    <input type="text"  ng-model="new_password" class="form-control" placeholder="New Password">
+
+	     <br/>
+	    <button class="btn btn-lg btn-primary btn-block" ng-click="changePassword()">Submit</button>
+	  </form>
+	</div>
+</div>

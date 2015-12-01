@@ -1,0 +1,37 @@
+<!-- getOnePoll VIEW -->
+<div class="container">
+		    <div class="row">
+		        <div ng-include="'views/alert.html'"></div>
+		    </div>
+    		<br/>
+
+	
+	<form action="" method="post" enctype="multipart/form-data">
+	  <div class="row" style="">
+	  	<input type="text" style="height:30px;" class="col-md-8" id="bookTitle" placeholder="Book title">&nbsp;
+	  	 <br/>
+	    <input type="text" ng-model="bookFile" class="form-group-addon" id="basic-addon1" style="background-color:#fff !important; border:none !important; "> 
+	 	 <br/>
+	  	<input type="file" name="filefield" id="uploadImage"/>
+	 	 <br/>
+
+	 	 <input type="button" ng-click="submitBook()" class="btn-md btn-success" value="submit"/>
+	  </div>
+	</form>
+
+		<br/>
+		 <!-- ng-show here -->
+		<div class="row animate-if">
+			<div class="media">
+			  <div class="media-left">
+			    <a href="#">
+			      <img class="media-object" src="..." alt="...">
+			    </a>
+			  </div>
+			  <div class="media-body">
+			    <h4 class="media-heading">{{book.bookTitle}}</h4>
+			  </div>
+			</div>
+		</div>
+
+</div>
