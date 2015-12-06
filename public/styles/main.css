@@ -180,3 +180,8 @@ body {
 input.form-control{
     border-radius: 10px;
 }
+
+.media-object{
+    border: #dddddd solid 1px;
+    border-radius: 10px;
+}

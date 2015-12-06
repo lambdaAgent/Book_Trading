@@ -14,11 +14,13 @@ var helper = require("./helper/helper.js");
 router.get('/books', function(req, res){
 	Book.find({}, function(err, Books){
 		if (err) return res.status(404).send(err); 
-			res.status(200).json(Books)
+		var book_arr = [];
+		helper.loopBookAndImage(req,res, Books, gfs, book_arr, function(){
+			res.status(200).header("Content-Type", "image/jpeg").json(book_arr);	
+		});
 	});
+		
 });
-
-
 
 //get all Books by the user only
 router.get("/user/:user_slug/books", function(req, res){
@@ -28,51 +30,39 @@ router.get("/user/:user_slug/books", function(req, res){
 		if (err)  return res.status(404).send(err); 
 		User.findOne(slug, function(err, user){
 			if (err)  return res.status(404).send(err); 
-			Book.find({user: user}, function(err, Books){
+			var userId = JSON.stringify({user: user._id});
+			Book.find(userId, function(err, Books){
 				if (err)  return res.status(404).send(err); 
-				res.status(200).json(Books);
-			})
+				var book_arr = [];
+				helper.loopBookAndImage(req,res, Books, gfs, book_arr, function(err, base64Image){
+					if(err) res.status(400).send({ message: 'File not found' });
+					res.status(200).header("Content-Type", "image/jpeg").json(book_arr);	
+				});
+			});
 		});
-	})
+	});
 });
 
-// //get one
-// router.get("/book/:id", function(req, res){
-// 	//get the Book number too.
-// 	//helper.authenticateJWT(req,res, function(err){
-// 		// if (err)  return res.status(404).send(err); 
-// 		Book.getById(req.params.id, function(err, Book){
-// 			if (err)  return res.status(404).send(err); 
-// 			res.status(200).json(Book);
-// 		});
-// 	//})
-// });
-router.post('/upload', function(req, res) {
+router.post('/upload/:user_slug', function(req, res) {
+	var slug = JSON.stringify({slug: req.params.user_slug});
 	//helper.authenticateJWT(req,res, function(err){
-		console.log(req.files);
 		var part = req.files.file;
-		var writeStream = gfs.createWriteStream({
-			filename: part.name,
-			mode: "w",
-			content_type: part.mimetype
+		User.findOne(slug, function(err ,user){
+			if (err)  return res.status(400).send(err); 
+			helper.createImageBook(req,res, gfs, user, part, function(err, bookImage){
+				if (err)  return res.status(400).send(err); 
+				res.status(200).json(bookImage);
+			});
 		});
-		writeStream.on('close', function(bookImage) {
-			//get the bookImage'id and attached here
-	  		res.status(200).send(bookImage);
-  	    });
-
-	    writeStream.write(part.data);
-	    writeStream.end();//close write stream
 	//});
 });
 
 router.post('/book/user/:user_slug', function(req, res) {
  	helper.authenticateJWT(req,res, function(err){
-
 	//create the bookImage first then create book with it's ID
 	var bookTitle = req.body.bookTitle;
 	var	bookImage = req.body.bookImage;
-	//attach listener, 
+	console.log(bookTitle);
 		var Book_obj = {
   			bookTitle: bookTitle,
   			bookImage: bookImage
@@ -81,7 +71,10 @@ router.post('/book/user/:user_slug', function(req, res) {
   		Book.create(Book_obj, function(err, Book_added){
   			if(err) return res.status(401).send(err);
 			User.findOneAndUpdate(slug,{$set: {Book:[Book_added]}}, {}, function(err ,user){
- 				Book.update(Book_added._id, {$set: {user: user._id}}, {}, function(err, Book) {
+ 				Book.update(Book_added._id, {$set: {user: user._id}}, {}, function(err, book) {
+ 					console.log(book);
+ 					console.log(bookImage);
+					if (err)  return res.status(404).send(err); 
  					return res.status(200).json(bookImage);
  				});
  			});
@@ -90,46 +83,35 @@ router.post('/book/user/:user_slug', function(req, res) {
 	});
 });
 
-router.delete("/Book/:id", function(req,res){
+router.get("/book/:book_id/:bookImage_id", function(req,res){
 	helper.authenticateJWT(req,res, function(err){
-		Book.remove(req.params.id, function(err){
+		helper.getImageGridFs(req,res, gfs, req.params.bookImage_id, function(data){
+				Book.getById(book_id, function(err, Book){
+		    		var book_obj = {
+		    			bookImage: data,
+		    			bookTitle: book.bookTitle
+		    		};
+					if (err) return res.status(404).send(err); 
+					res.status(200).json(book_obj);
+				});
+		});
+    });//helper authenticate
+});
+//must do deep delete the image book too.
+router.delete("/book/:id", function(req,res){
+	helper.authenticateJWT(req,res, function(err){
+		Book.findById(req.params.id, function(err, book){
 			if(err) return res.status(404).send(err);
-			res.status(200).send("successfully deleted Book");
+			gfs.remove({_id: book.bookImage}, function(){
+				if(err) return res.status(404).send(err);
+				Book.remove(req.params.id, function(err){
+					if(err) return res.status(404).send(err);
+					res.status(200).send("successfully deleted Book");
+				});
+			});
 		});
     });
 });
-
-// exports.read = function(req, res) {
- 
-// 	gfs.files.find({ filename: req.params.filename }).toArray(function (err, files) {
- 
-//  	    if(files.length===0){
-// 			return res.status(400).send({
-// 				message: 'File not found'
-// 			});
-//  	    }
-	
-// 		res.writeHead(200, {'Content-Type': files[0].contentType});
-		
-// 		var readstream = gfs.createReadStream({
-// 			  filename: files[0].filename
-// 		});
- 
-// 	    readstream.on('data', function(data) {
-// 	        res.write(data);
-// 	    });
-	    
-// 	    readstream.on('end', function() {
-// 	        res.end();        
-// 	    });
- 
-// 		readstream.on('error', function (err) {
-// 		  console.log('An error occurred!', err);
-// 		  throw err;
-// 		});
-// 	});
- 
-// };
 
 module.exports = router;
 

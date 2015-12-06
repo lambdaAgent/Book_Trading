@@ -3,7 +3,7 @@ var mongoose = require("mongoose");
 var bookSchema = mongoose.Schema({
 	bookTitle: {type: String, required: true},
 	bookImage: {type: mongoose.Schema.Types.ObjectId},
-	user: { type: mongoose.Schema.Types.ObjectId, ref:"User" },
+	user: String,
 	created_at: {type: Date, default: Date.now}
 });
 var Book = mongoose.model("Book", bookSchema);
