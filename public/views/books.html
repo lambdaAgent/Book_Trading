@@ -10,8 +10,11 @@
 			<div class="animate-if col-md-4"  ng-repeat="book in allBooks">
 				<div class="media" >
 				  <h4 class="text-center">{{book.bookTitle}}</h4>
+				  <p class="text-center">by: <strong>{{book.userName}}</strong></p>
 				  <div class="media-left">
+
 				    <a href="#">
+				    	<p ng-show="book.tradeListed" class="btn btn-primary" style="position:absolute;">trade listed</p>
 				    	<img class="media-object" src="data:image/png;base64,{{book.bookImageBase64}}" width="200px;" height="" alt=""/>
 				    </a>
 				  </div>

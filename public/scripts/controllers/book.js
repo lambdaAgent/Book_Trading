@@ -25,6 +25,17 @@ angular.module('psJwtApp')
 			 	alert('danger', 'Sorry',  err + '!');
 			 });
 		};
+
+		$scope.tradeListed = function(id, index){
+			var user_slug = authToken.getSlug();
+			$http.post(API_URL + "/book/tradeListed/" + id)
+			  .success(function(book){
+			  	    $scope.books[index].tradeListed = book.tradeListed;
+			  })
+			  .error(function(err){
+     			 	alert('danger', 'Sorry',  "Cannot listed this book" + '!');
+			  })
+		};	
 		// $scope.getOne = function(id){
 		// 	$scope.whichView = 'getOnePoll';
 		// 	$http.get(API_URL+"/vote/" + id).success(function(data) {
@@ -51,7 +62,7 @@ angular.module('psJwtApp')
 			i++;
 		};
 		$scope.delete = function(id) {
-			$http.delete(API_URL+"/book/"+ id) 
+			$http.delete(API_URL+"/book/"+ id + "/" + authToken.getSlug()) 
 			.success(function(){
 				alert('warning', "deleted" + '!');
            		$state.go('.', {}, { reload: true });
@@ -64,7 +75,15 @@ angular.module('psJwtApp')
 			var bookTitle = angular.element(document.getElementById("bookTitle"))[0].value;
 			var bookFile = angular.element(document.getElementById("uploadImage"))[0];
 			var bookImage = bookFile.files[0];
-			var bookImageSize =bookImage.size;
+
+			if (bookTitle === "" || !bookTitle){
+				return alert("warning", "Sorry", "Please fill book title");
+			}
+			if (!bookImage){
+				return alert("warning", "Sorry", "Please select book cover");				
+			}
+
+			var bookImageSize = bookImage.size;
 			var bookImageType = bookImage.type;
 			var imageWidth = 0;
 			var imageHeight = 0;
@@ -84,13 +103,6 @@ angular.module('psJwtApp')
 			if (bookImageSize > 250000  || imageWidth > 500 || imageHeight > 500){
 				return alert("warning", "Sorry", "image must be lest than 250kb nor bigger than 500 x 500");
 			}
-			if (bookTitle === "" || !bookTitle){
-				return alert("warning", "Sorry", "Please fill book title");
-			}
-			if (!bookImage){
-				return alert("warning", "Sorry", "Please select book cover");				
-			}
-
 			var fd = new FormData();
 			fd.append("file", bookImage);
 
@@ -113,7 +125,7 @@ angular.module('psJwtApp')
 						alert("success", "successfully added your book");
 	            		$state.go('books', {}, { reload: true });
 					$timeout(function(){
-	            		$state.go('book', {}, { reload: true });
+	            		$state.go('myBook', {}, { reload: true });
 					},10);					
         		})
 				.error(function(err){

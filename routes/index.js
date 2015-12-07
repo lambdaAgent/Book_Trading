@@ -1,4 +1,4 @@
-var express = require('express');
+	var express = require('express');
 var router = express.Router();
 var debug = require("debug");
 var mongoose = require("mongoose");
@@ -11,15 +11,13 @@ router.get('/', function(req, res, next) {
 
 //post register -> //must be able to check for double email
 router.post("/register", function(req,res, next){
-	console.log(req.body);
 	User.findOne( {email: req.body.email}, function(err, user){
 		if (err) { return res.status(404).send(err); }
 		if (user) {
 			return res.status(401).send( {"message": "email already exists in database"});
 		}
 		var newUser = new User({
-			firstName : req.body.firstName,
-			lastName: req.body.lastName,
+			userName: req.body.userName,
 			email : req.body.email,
 			password: req.body.password
 		});
@@ -51,18 +49,40 @@ router.post("/login", function(req,res){
    });
 });
 
-router.post("/change_address", function(req, res, next){
-	var user = req.body;
+router.post("/changeDetails/:user_slug", function(req, res, next){
+	if(!req.body.firstName || !req.body.lastName){
+		return res.status(400).send({"message" : "firstName and lastName is required"})
+	}
 	helper.authenticateJWT(req, res, function(err){
 		if (err) { return res.status(404).send(err); }
-		var slug = JSON.stringify({slug: req.body.user_slug})
-		/* make address_obj object
-			   
-			*/
-		User.findOneAndUpdate( slug, {$set: {address: address_obj}}, {}, function(err, user) {
-			if (err) { return res.status(404).send(err); }
-			res.status(200).send("successfully change address");
-		});
+		var slug = {"slug": req.params.user_slug};
+		console.log(slug);
+		//if currentPassword === User.find(password) || currentPassword === ""
+		var user = {
+			firstName: req.body.firstName,
+			lastName: req.body.lastName,
+			address: {
+				street: req.body.street,
+				state: req.body.state,
+				city: req.body.city
+			}
+		};
+		User.findOne(slug, function(err, user){
+			console.log(user)
+		})
+		User.findOneAndUpdate(
+			slug, 
+			{ $set: {
+				firstName: user.firstName,
+				lastName: user.lastName,
+				address: user.address
+			}},
+			function(err, user) {
+				console.log(user);
+				if (err) { return res.status(404).send(err); }
+				res.status(200).send("successfully change details");
+			}
+		);//User.update()
     });
 });
 
@@ -88,7 +108,7 @@ module.exports = router;
 // 	}
 // 	helper.authenticateJWT(req, res, function(err){
 // 		if (err) { return res.status(404).send(err); }
-// 		var slug = JSON.stringify({slug: req.body.user_slug})
+// 		var slug = {"slug": req.params.user_slug};
 // 		User.findOne( slug, function(err, user) {
 // 			if (err) { return res.status(404).send(err); }
 // 			User.verifyPassword(req.body.currentPassword, user.password, function(err, isMatch){

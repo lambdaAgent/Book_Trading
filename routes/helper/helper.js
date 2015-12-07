@@ -8,11 +8,13 @@ var createSendToken = function  (req,res, user, next) {
 		iss: req.hostname, 
 		sub: user.id
 	};
+	console.log(user.userName);
 	var user_slug = user.slug;
 	var token = jwt.encode(payload, EMAIL_SECRET);
 	res.status(200).send({
-		user_slug: JSON.stringify(user_slug),
-		token: token
+		user_slug: user_slug,
+		token: token,
+		user_name: user.userName
 	});
 	next();
 }
@@ -68,6 +70,9 @@ var loopBookAndImage = function(req,res, Books, gfs, book_arr, next){
 					bookTitle: book.bookTitle,
 					bookImageBase64: base64Image,
 					created_at: book.created_at,
+					tradeListed: book.tradeListed,
+					userName: book.userName,
+					user: book.user,
 					_id: book._id
 				});
 				if(book_arr.length === Books.length) { eventEmitter.emit("bookImageDone"); }

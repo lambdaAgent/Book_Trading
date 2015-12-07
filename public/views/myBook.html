@@ -4,8 +4,7 @@
 		        <div ng-include="'views/alert.html'"></div>
 		    </div>
     		<br/>
-
-	
+    		
 	<form action="" method="post" enctype="multipart/form-data">
 	  <div class="row" style="">
 	  	<input type="text" style="height:30px;" class="col-md-8" id="bookTitle" placeholder="Book title">&nbsp;
@@ -23,18 +22,18 @@
 			<div class="form-inline well col-md-12 animate-if"><!--getOne -->
 			     <div class="row">
 					<div class="form-group col-md-9" >
-						<div class="col-md-5">
+						<div class="col-md-6">
 							<h3 class="navbar-text">{{book.bookTitle}}</h3>
-							<p class="navbar-text">{{book.created_at  |  date:'MM/dd/yyyy'}}</p>
-							{{book._id}}
+							<p class="navbar-text"><strong>book added: </strong>{{book.created_at  |  date:'MM/dd/yyyy'}}</p>
 						</div>
-						<div class="col-md-5">
+						<div class="col-md-6">
 							<img src="data:image/png;base64,{{book.bookImageBase64}}" width="" height="100px;" alt=""/>
 						</div>
 						<p class="sr-only"></p>
 					</div>
 					<div class="form-group col-md-3" style="float:right;">
-						<button class="btn-lg btn-danger" ng-click="delete(book._id)">Delete</button>
+						<button class="btn-lg" ng-class=" book.tradeListed ? 'btn-primary': 'btn-success'" ng-click="tradeListed(book._id, $index)">Trade Listed</button>
+						<button class="btn-lg btn-danger" style="margin-top: 10px;" ng-click="delete(book._id)">Delete</button>
 					</div>
 				</div>
 			</div>

@@ -3,18 +3,20 @@
 angular.module('psJwtApp').controller('RegisterCtrl', 
 	function (API_URL, $scope, $http, authToken, alert, $state) {
 	$scope.submit = function () {
+		if($scope.password_confirm !== $scope.password){
+			alert("danger", "password does not match")
+		}
 		var url = API_URL + "/register";
 		var user = {
-			firstName: $scope.firstName,
-			lastName: $scope.lastName,
+			userName: $scope.userName,
 			email: $scope.email,
 			password: $scope.password
 		};
-		console.log(user);
 		$http.post(url, user)
 		     .success(function(result){
 		    	authToken.setToken(result.token);
 		    	authToken.setSlug(result.user_slug);
+		    	authToken.setUserName(result.user_name);
 		    	$state.go('main');
 		     })
 		     .error(function(err){

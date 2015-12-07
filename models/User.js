@@ -2,8 +2,9 @@ var mongoose = require("mongoose");
 var bcrypt = require('bcrypt-nodejs');
 
 var userSchema = mongoose.Schema({
-	firstName : {type: String, required: true},
-	lastName: {type: String, required: true},
+	firstName : {type: String},
+	lastName: {type: String},
+	userName: {type: String, required: true},
 	password: {type: String, required: true},
 	address: {
 		street: String,
@@ -31,7 +32,7 @@ userSchema.pre("save", function(next){
 
 	var date = Date.now();
 	var slug = String(date).slice(-7);
-	user.slug = user.firstName + user.lastName + slug.toString();
+	user.slug = user.userName + slug.toString();
 });
 
 User.genPassword = function(password, next){

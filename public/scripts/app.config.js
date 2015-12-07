@@ -30,10 +30,10 @@ angular.module('psJwtApp').config(
 		templateUrl: '/views/books.html',
 		controller: 'BookCtrl'
 	})
-	.state('book', {
-		url: '/book',
-		templateUrl: '/views/book.html',
-		//controller: 'BookCtrl'
+	.state('myBook', {
+		url: '/myBook',
+		templateUrl: '/views/myBook.html',
+		controller: 'BookCtrl'
 	})
 	.state('logout', {
 		url: '/logout',

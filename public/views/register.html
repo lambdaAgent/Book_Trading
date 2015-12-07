@@ -6,8 +6,7 @@
 <div class="container">
 <form name="register" class="form-signin" validate>
     <h1 class="form-signin-heading text-muted">Register</h1>
-    <input name="firstName" ng-model="firstName" type="text" class="form-control" placeholder="first name" required>
-    <input name="lastName" ng-model="lastName" type="text" class="form-control" placeholder="last name" required>
+    <input name="username" ng-model="userName" type="text" class="form-control" placeholder="user name" required>
     <input name="email" ng-model="email" type="email" class="form-control" placeholder="Email address" required>
     <p class="help-block" ng-show="register.email.$dirty && register.email.$invalid">Please enter a proper email.</p>
     <input name="password" ng-model="password" type="password" class="form-control" placeholder="Password" required>

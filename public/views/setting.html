@@ -6,15 +6,33 @@
 <div class="container">
 	<div class="animate-if">
 	  <form class="">
-	    <h2 class="form-signin-heading">Change Password</h2>
+	  	<h2 class="form-signin-heading" style="text-decoration: underline;">User Details</h2>
+
+	  	<h3 class="form-signin-heading">Name</h3>
+	    <label for="inputName" class="">First Name</label>
+	    <input type="text"  ng-model="first_name" class="form-control" placeholder="First Name">
+
+	    <label for="inputName" class="">Last Name</label>
+	    <input type="text"  ng-model="last_name" class="form-control" placeholder="Last Name">
+	    
+	    <h3 class="form-signin-heading">Address</h3>
+	    <label for="inputName" class="">Street</label>
+	    <input type="text"  ng-model="street" class="form-control" placeholder="Street">
+	    <label for="inputName" class="">State</label>
+	    <input type="text"  ng-model="state" class="form-control" placeholder="state">
+	    <label for="inputName" class="">city</label>
+	    <input type="text"  ng-model="city" class="form-control" placeholder="city">
+	    
+	 <!--  	<h2 class="form-signin-heading" style="text-decoration: underline;">Change Password</h2>
 	    <label for="inputName" class="">Current Password</label>
 	    <input type="text"  ng-model="current_password" class="form-control" placeholder="Current Password">
-	    
 	    <label for="options1" class="">New Password</label>
-	    <input type="text"  ng-model="new_password" class="form-control" placeholder="New Password">
+	    <input type="text"  ng-model="new_password" class="form-control" placeholder="New Password"> -->
 
 	     <br/>
-	    <button class="btn btn-lg btn-primary btn-block" ng-click="changePassword()">Submit</button>
+	    <button class="btn btn-lg btn-primary btn-block" ng-click="changeDetails()">Submit</button>
 	  </form>
 	</div>
 </div>
+
+User Story: As an authenticated user, I can update my settings to store my full name, city, and state.

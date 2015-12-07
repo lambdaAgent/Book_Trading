@@ -5,12 +5,14 @@ angular.module('psJwtApp').factory('authToken', function($window) {
     var cachedToken;
     var cachedSlug;
     var cachedVoted;
+    var cachedUserName;
+    var userName = "";
     var userToken = 'userToken';
     var isAuthenticated = false;
     var authToken = {
         setToken: function(token) {
             cachedToken = token;
-            storage.setItem(userToken, token);
+            storage.setItem("userToken", token);
             isAuthenticated = true;
         },     
         getToken: function() {
@@ -18,6 +20,17 @@ angular.module('psJwtApp').factory('authToken', function($window) {
                 cachedToken = storage.getItem(userToken);
 
             return cachedToken;
+        },
+        setUserName: function(userName){
+            cachedUserName = userName;
+            storage.setItem("user_name", userName);
+            isAuthenticated = true;
+        },
+        getUserName: function(){
+            if (!cachedUserName)
+                cachedUserName = storage.getItem(userName);
+
+            return cachedUserName;
         },
         setSlug: function(slug){
             cachedSlug = slug;
