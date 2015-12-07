@@ -41,11 +41,7 @@ var getImageGridFs = function(req, res, gfs, bookImage_id, next){
 		gfs.files.find({ 
 			_id: bookImage_id 
 		}).toArray(function (err, files) {
- 			if(err) {
- 				console.log("ERROR")
- 				console.log(err)
- 				return next(err);
- 			}
+ 			if(err) { return next(err);	}
 	 	    if(files.length === 0) return next({ message: 'File not found' });
 	 	 	var readstream = gfs.createReadStream({
 				  filename: files[0].filename
@@ -67,19 +63,18 @@ var getImageGridFs = function(req, res, gfs, bookImage_id, next){
 var loopBookAndImage = function(req,res, Books, gfs, book_arr, next){
 	Books.map(function(book, index){
 		if(book.bookImage){
-			getImageGridFs(req,res, gfs, book.bookImage, function(err, data){
-			console.log(err)	
+			getImageGridFs(req,res, gfs, book.bookImage, function(err, base64Image){
 				book_arr.push({
 					bookTitle: book.bookTitle,
-					bookImageBase64: data,
+					bookImageBase64: base64Image,
 					created_at: book.created_at,
 					_id: book._id
 				});
-				if(index === (Books.length-1)) { eventEmitter.emit("bookImageDone"); }
+				if(book_arr.length === Books.length) { eventEmitter.emit("bookImageDone"); }
 			});
 		} else {
 			book_arr.push({	bookTitle: book.bookTitle });
-			if(index === (Books.length-1)) { eventEmitter.emit("bookImageDone"); }
+			if(book_arr.length === Books.length) { eventEmitter.emit("bookImageDone"); }
 		}
 	});
 	eventEmitter.once("bookImageDone", function(){

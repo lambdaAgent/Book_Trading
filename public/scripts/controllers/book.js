@@ -62,15 +62,33 @@ angular.module('psJwtApp')
 
 		$scope.submitBook = function(){
 			var bookTitle = angular.element(document.getElementById("bookTitle"))[0].value;
-			var bookImage = angular.element(document.getElementById("uploadImage"))[0].files[0];
+			var bookFile = angular.element(document.getElementById("uploadImage"))[0];
+			var bookImage = bookFile.files[0];
+			var bookImageSize =bookImage.size;
+			var bookImageType = bookImage.type;
+			var imageWidth = 0;
+			var imageHeight = 0;
 
+			var img = new Image();
+			var _URL = window.URL || window.webkitURL;
+			img.src = _URL.createObjectURL(bookImage);
+
+			img.onload = function(){
+				imageWidth = img.width
+				imageHeight = img.height
+			}
+
+			if (bookImageType.indexOf("image") === -1){
+				return alert("warning", "Sorry", "Please make sure to upload image file")
+			}
+			if (bookImageSize > 250000  || imageWidth > 500 || imageHeight > 500){
+				return alert("warning", "Sorry", "image must be lest than 250kb nor bigger than 500 x 500");
+			}
 			if (bookTitle === "" || !bookTitle){
-				alert("warning", "Sorry", "Please fill book title");
-				return;
+				return alert("warning", "Sorry", "Please fill book title");
 			}
 			if (!bookImage){
-				alert("warning", "Sorry", "Please select book cover");
-				return;				
+				return alert("warning", "Sorry", "Please select book cover");				
 			}
 
 			var fd = new FormData();
@@ -94,7 +112,6 @@ angular.module('psJwtApp')
 						$scope.bookImage = data.bookImage;
 						alert("success", "successfully added your book");
 	            		$state.go('books', {}, { reload: true });
-
 					$timeout(function(){
 	            		$state.go('book', {}, { reload: true });
 					},10);					
@@ -104,32 +121,7 @@ angular.module('psJwtApp')
 				});
 	        }).error(function(err){
 				alert('danger', 'Sorry',  err.responseText + '!');
-			});
-			// $.ajax({
-			// 	  url: API_URL + '/upload/' + String(user_slug),
-			// 	  data: fd,
-			// 	  processData: false,
-			// 	  contentType: false,
-			// 	  type: 'POST',
-			// 	  success: function(bookImage){
-			// 	  	var book = {
-			// 			bookTitle: bookTitle,
-			// 			bookImage: bookImage._id
-			// 		};
-			// 	    $http.post(API_URL+"/book/user/" + user_slug, book)
-			// 		 .success(function(data){
-			// 			$scope.bookImage = data.bookImage;
-			// 			alert("success", "successfully added your book");
-   //              		$state.go('book', {}, { reload: true });
-
-			// 		}).error(function(err){
-			// 			alert('danger', 'Sorry',  err.message + '!');
-			// 		});
-			// 	  },
-			// 	  error: function(err){
-			// 		alert('danger', 'Sorry',  err.responseText + '!');
-			// 	  }
-			// });			
+			});		
 		};
 
 	

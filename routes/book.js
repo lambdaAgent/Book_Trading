@@ -102,9 +102,9 @@ router.delete("/book/:id", function(req,res){
 	helper.authenticateJWT(req,res, function(err){
 		Book.findById(req.params.id, function(err, book){
 			if(err) return res.status(404).send(err);
-			gfs.remove({_id: book.bookImage}, function(){
+			gfs.remove({_id: book.bookImage}, function(err){
 				if(err) return res.status(404).send(err);
-				Book.remove(req.params.id, function(err){
+				book.remove(function(err){
 					if(err) return res.status(404).send(err);
 					res.status(200).send("successfully deleted Book");
 				});
