@@ -5,7 +5,6 @@
 var mongoose = require("mongoose");
 
 var tradeSchema = mongoose.Schema({
-	status: {type:String, required: true},
 	//pending, accept, false
 	User: {type: mongoose.Schema.Types.ObjectId, ref:"User"},
 	bookToTrade: {type: mongoose.Schema.Types.ObjectId, ref:"Book"},
@@ -15,4 +14,4 @@ var tradeSchema = mongoose.Schema({
 	created_at: {type:Date, default: Date.now}
 });
 
-mongoose.model("TradeProposal", tradeSchema);
+mongoose.model("TradeTransaction", tradeSchema);

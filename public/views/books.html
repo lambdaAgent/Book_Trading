@@ -3,18 +3,22 @@
         <div ng-include="'views/alert.html'"></div>
     </div>
     <br/>
-
+    
 	<div class="container">
+		<form class="form-group">
+		    <label for="checked">Only show listed books</label> &nbsp;
+		    <input type="checkbox" name="checked" id="checked"style="transform:scale(1.5)" ng-click="showListedOnly(ListedOnly)" ng-model="ListedOnly">
+	    </form>
 		<div class="row">
 			<!-- getPolls VIEW -->
-			<div class="animate-if col-md-4"  ng-repeat="book in allBooks">
+			<div class="animate-if col-md-4 well"  style="height: 350px;"ng-repeat="book in allBooks">
 				<div class="media" >
 				  <h4 class="text-center">{{book.bookTitle}}</h4>
 				  <p class="text-center">by: <strong>{{book.userName}}</strong></p>
 				  <div class="media-left">
 
-				    <a href="#">
-				    	<p ng-show="book.tradeListed" class="btn btn-primary" style="position:absolute;">trade listed</p>
+				    <a style="cursor:pointer" ng-click="ifListedGoToDetailPage(book.tradeListed, book._id)">
+				    	<p ng-show="book.tradeListed" class="btn btn-primary" style="position:absolute;">Listed</p>
 				    	<img class="media-object" src="data:image/png;base64,{{book.bookImageBase64}}" width="200px;" height="" alt=""/>
 				    </a>
 				  </div>

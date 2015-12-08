@@ -185,3 +185,8 @@ input.form-control{
     border: #dddddd solid 1px;
     border-radius: 10px;
 }
+
+.vertical-line{
+    border-left: thick solid #ff0000;
+    height: 50%;
+}

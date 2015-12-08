@@ -2,13 +2,12 @@ var jwt = require("jwt-simple");
 var EMAIL_SECRET = process.env.EMAIL_SECRET;
 var events = require('events');
 var eventEmitter = new events.EventEmitter();
-
+var mongoose = require("mongoose");
 var createSendToken = function  (req,res, user, next) {
 	var payload = {
 		iss: req.hostname, 
 		sub: user.id
 	};
-	console.log(user.userName);
 	var user_slug = user.slug;
 	var token = jwt.encode(payload, EMAIL_SECRET);
 	res.status(200).send({
@@ -39,7 +38,6 @@ var authenticateJWT = function(req,res, next){
 }
 
 var getImageGridFs = function(req, res, gfs, bookImage_id, next){
-	console.log("GETTING BOOK getImageGridFs")
 		gfs.files.find({ 
 			_id: bookImage_id 
 		}).toArray(function (err, files) {
@@ -68,6 +66,7 @@ var loopBookAndImage = function(req,res, Books, gfs, book_arr, next){
 			getImageGridFs(req,res, gfs, book.bookImage, function(err, base64Image){
 				book_arr.push({
 					bookTitle: book.bookTitle,
+					bookImage: book.bookImage,
 					bookImageBase64: base64Image,
 					created_at: book.created_at,
 					tradeListed: book.tradeListed,
@@ -97,13 +96,66 @@ var createImageBook = function(req, res, gfs, user, part, next){
 			content_type: part.mimetype
 		});
 		writeStream.on('close', function(bookImage) {
+			// the first argument is error, to match the pattern.
+			// one argument === error, which is managed by if(!part) above
 			next(undefined, bookImage);
  		});	  		
     writeStream.write(part.data);
     writeStream.end();//close write stream
-}
+};
+
+var swapBooksOwnership = function(req, res, Book, User, bookTradeFor_id, bookTradeWith_id, userTradeFor, my_user, next){
+	Book.update(
+		bookTradeFor_id,
+		{
+			$set: {
+				//tradeListed: false,
+				user: my_user._id,
+				userName: my_user.userName
+			}
+		},
+		function(err, newBookTradeFor){
+			if(err) return res.status(400).send(err);
+			Book.update(
+				bookTradeWith_id,
+				{
+					$set: {
+						//tradeListed: false, 
+						user: userTradeFor._id,
+						userName: userTradeFor.userName,
+					}
+				},
+				function(err, newBookTradeWith){
+					var newBook = {
+						newBook1: newBookTradeFor,
+						newBook2: newBookTradeWith
+					}
+					if(err) return res.status(400).send(err);
+					next(undefined, newBook);
+				});
+	});
+};
+
+//mongodb cannot $push and $pull at the same time!!! sucks
+var swapUserTradeBook = function(req, res, Book, User, bookTradeFor_id, bookTradeWith_id, userTradeFor, my_user, next){
+	User.update(userTradeFor._id, { $push: {book: bookTradeWith_id} }, function(){
+		User.update(userTradeFor._id, {	$pull: {book: bookTradeFor_id }	}, function(err, newUserTradeFor){
+		//end of push and pull
+		if(err) return res.status(400).send({"message": "Cannot update the user"});
+		User.update(my_user._id, { $push: {book: bookTradeFor_id } }, function(){
+			User.update(my_user._id, { $pull: {book: bookTradeWith_id }	}, function(err, newMy_user){
+			//end of push and pull
+			if(err) return res.status(400).send({"message": "Cannot update the user"});
+			next();
+		});
+		});
+	});
+	});
+};
 
 module.exports = {
+	swapUserTradeBook: swapUserTradeBook,
+	swapBooksOwnership: swapBooksOwnership,
 	createImageBook: createImageBook,
 	loopBookAndImage: loopBookAndImage,
 	getImageGridFs: getImageGridFs,

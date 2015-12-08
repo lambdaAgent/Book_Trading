@@ -28,7 +28,7 @@ angular.module('psJwtApp').factory('authToken', function($window) {
         },
         getUserName: function(){
             if (!cachedUserName)
-                cachedUserName = storage.getItem(userName);
+                cachedUserName = storage.getItem("user_name");
 
             return cachedUserName;
         },

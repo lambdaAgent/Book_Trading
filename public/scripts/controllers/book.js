@@ -2,24 +2,43 @@
 
 angular.module('psJwtApp')
 	.controller('BookCtrl', function ($scope, $http, API_URL, alert, authToken, $state, $timeout) {
-		$scope.test = function(){
-			console.log("CHANGED")
-		}
+		var unfilteredAllBooks;
+
+		$scope.ifListedGoToDetailPage = function(isListed, id){
+			console.log(authToken.getToken())
+			if(authToken.getToken() === undefined || authToken.getToken() === "" || authToken.getToken() === null){
+				return alert("danger", "Please register or login");
+			}
+			if(isListed){
+				return $state.go("book_detail", {"book_id": id});
+			}
+		};
+		$scope.showListedOnly = function(isShowListed){
+			if(isShowListed === true){
+				var listedOnly = unfilteredAllBooks.filter(function(book){
+					return book.tradeListed === true;
+				});
+				$scope.allBooks = listedOnly;
+			} else {
+				$scope.allBooks = unfilteredAllBooks;
+			}
+
+		};
 		$scope.getAllBooks = function(){
 			$http.get(API_URL + "/books").success(function(data){
 				$scope.allBooks = data;
-				alert("success", "successfully get Books");
+				unfilteredAllBooks = data;
+				//alert("success", "successfully get Books");
 			}).error(function(err){
 				alert('danger', 'Sorry', err.message + '!');
 			});
 		};
-		
 		$scope.getMyBooks = function(){
 			var user_slug = authToken.getSlug();
 			$http.get(API_URL + "/user/" + user_slug + "/books")
 			 .success(function(books){
 			 	$scope.books = books;
-				alert("success", "successfully get My Books");
+				//alert("success", "successfully get My Books");
 			 })
 			 .error(function(err){
 			 	alert('danger', 'Sorry',  err + '!');
@@ -36,24 +55,6 @@ angular.module('psJwtApp')
      			 	alert('danger', 'Sorry',  "Cannot listed this book" + '!');
 			  })
 		};	
-		// $scope.getOne = function(id){
-		// 	$scope.whichView = 'getOnePoll';
-		// 	$http.get(API_URL+"/vote/" + id).success(function(data) {
-		// 		$scope.oneVote = data;
-		// 		$scope.totalVotes = data.voteChoices.map(function(item){
-		// 			return item.vote;
-		// 		}).reduce(function(prev,next){
-		// 			return prev + next;
-		// 		});
-		// 		data.voteChoices.map(function(item){
-		// 			var result = ($scope.totalVotes > 0) ? (item.vote/$scope.totalVotes).toFixed(2) * 100 : 0
-		// 			item.votePercentage = result.toFixed(2);
-		// 		});
-		// 	}).error(function(err){
-	
-		// 		alert('danger', 'Sorry',  err.message + '!');
-		// 	})
-		// };
 		$scope.moreOptions = function() {
 			var options = angular.element(document.getElementById("options-field"));
 			var list = '<input type="text" id="options1" class="form-control" placeholder="next options" ng-model="options'+ i + '">';

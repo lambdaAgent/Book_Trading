@@ -4,6 +4,7 @@ var debug = require("debug");
 var mongoose = require("mongoose");
 var User = mongoose.model("User");
 var Book = mongoose.model("Book");
+var TradeForm = mongoose.model("TradeTransaction");
 var fs = require("fs");
 var Grid = require("gridfs-stream");
 Grid.mongo = mongoose.mongo;
@@ -47,18 +48,44 @@ router.get("/user/:user_slug/books", function(req, res){
 });
 
 /*
+ *  getOneBook and it's detail to be traded
+ */
+router.get("/book/:book_id", function(req,res){
+	var book_obj = {}
+	helper.authenticateJWT(req,res, function(err){
+		helper.getImageGridFs(req,res, gfs, req.params.bookImage_id, function(data){
+			Book.getById(req.params.book_id, function(err, book){				
+				if (err) return res.status(404).send(err); 
+				helper.getImageGridFs(req,res, gfs, book.bookImage, function(err, base64Image){
+					if(err) res.status(400).send({ message: 'File not found' });
+					var book_obj = {
+						bookTitle: book.bookTitle,
+						bookImageBase64: base64Image,
+						created_at: book.created_at,
+						tradeListed: book.tradeListed,
+						userName: book.userName,
+						user: book.user,
+						_id: book._id,
+						bookImageBase64: base64Image
+					}
+					res.status(200).json(book_obj);
+				})
+			});
+		});
+    });//helper authenticate
+});
+
+/*
  *  trade listed
  */
 router.post("/book/tradeListed/:id", function(req, res){
 	var bookId = req.params.id;
 	var isTraded = false;
-	console.log("BOOKID: " + bookId);
  	helper.authenticateJWT(req,res, function(err){
 		Book.findById(bookId, function(err, book){
 			if(book.tradeListed === false) { isTraded = true; }
 			else { isTraded = false; }
 			Book.update(book._id, {$set: {tradeListed: isTraded}},{new:true}, function(err, book){
-				console.log(book);
 				res.status(200).json(book);
 			});
 		});
@@ -95,7 +122,6 @@ router.post('/book/user/:user_slug', function(req, res) {
   		Book.create(Book_obj, function(err, Book_added){
   			if(err) return res.status(401).send(err);
 			User.findOneAndUpdate(slug,{$push: {book:Book_added}}, {}, function(err ,user){
-				console.log(user);
 				var bookUser = {
 					user: user._id, userName: user.userName
 				}
@@ -108,23 +134,7 @@ router.post('/book/user/:user_slug', function(req, res) {
     
 	});
 });
-/*
- *  What is this get route???
- */
-// router.get("/book/:book_id/:bookImage_id", function(req,res){
-// 	helper.authenticateJWT(req,res, function(err){
-// 		helper.getImageGridFs(req,res, gfs, req.params.bookImage_id, function(data){
-// 				Book.getById(book_id, function(err, Book){
-// 		    		var book_obj = {
-// 		    			bookImage: data,
-// 		    			bookTitle: book.bookTitle
-// 		    		};
-// 					if (err) return res.status(404).send(err); 
-// 					res.status(200).json(book_obj);
-// 				});
-// 		});
-//     });//helper authenticate
-// });
+
 
 //must do deep delete the image book too, and update the user books.
 router.delete("/book/:id/:user_slug", function(req,res){
@@ -132,7 +142,7 @@ router.delete("/book/:id/:user_slug", function(req,res){
 		var slug = {"slug": req.params.user_slug};
 		Book.findById(req.params.id, function(err, book){
 			if(err) return res.status(404).send(err);
-			User.findOneAndUpdate(slug, {$pull : {book: {$in: [book._id]} }}, function(err, user){
+			User.findOneAndUpdate(slug, {$pull : {book: {$in: [book._id]} } }, function(err, user){
 				gfs.remove({_id: book.bookImage}, function(err){
 					if(err) return res.status(404).send(err);
 					book.remove(function(err){
@@ -145,5 +155,44 @@ router.delete("/book/:id/:user_slug", function(req,res){
     });
 });
 
+/*
+ *  swap the book
+ *  1. swapBookOwnership
+ *  2. swapUser's book, $push and $pull book's id, return 200 and book here
+ *  3. create TradeForm, no need to return anything, just fill out the Form
+ *  4.
+ */
+router.post("/trade/:bookToGet_user/:bookToGet_id/:bookToGet_image/With/:user_slug/:bookToGive_id/:bookToGive_image", function(req, res){
+	helper.authenticateJWT(req, res,function(err){
+		var tradeFor_userId = req.params.tradeFor_user;
+		var slug = {"slug": req.params.user_slug};
+		User.findOne(slug, function(err, my_user){
+			if(err) return res.status(400).send(err);
+			User.findById(req.params.bookToGet_user, function(err, userTradeFor){
+				if(err) return res.status(400).send(err);
+				/*1*/helper.swapBooksOwnership(req, res, Book, User, req.params.bookToGet_id, req.params.bookToGive_id, userTradeFor, my_user, function(err, newBook){
+					if(err) return res.status(400).send(err);
+					/*2*/helper.swapUserTradeBook(req, res, Book, User, req.params.bookToGet_id, req.params.bookToGive_id, userTradeFor, my_user, function(){
+						if(err) return res.status(400).send(err);
+						res.status(200).json(newBook);
+						/*3 Create tradeForm*/
+
+					});
+				});
+			});
+
+		
+			
+ 
+		});
+		// create book based on the details 
+		// put the image_id
+		// search User by user_slug update $push the book, $pull old book,
+		// update the form
+
+		// do the same with the tradee user.
+		// don't forget to create form too
+	});
+});
 module.exports = router;
 

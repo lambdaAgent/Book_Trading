@@ -56,7 +56,6 @@ router.post("/changeDetails/:user_slug", function(req, res, next){
 	helper.authenticateJWT(req, res, function(err){
 		if (err) { return res.status(404).send(err); }
 		var slug = {"slug": req.params.user_slug};
-		console.log(slug);
 		//if currentPassword === User.find(password) || currentPassword === ""
 		var user = {
 			firstName: req.body.firstName,
@@ -67,9 +66,6 @@ router.post("/changeDetails/:user_slug", function(req, res, next){
 				city: req.body.city
 			}
 		};
-		User.findOne(slug, function(err, user){
-			console.log(user)
-		})
 		User.findOneAndUpdate(
 			slug, 
 			{ $set: {
@@ -78,7 +74,6 @@ router.post("/changeDetails/:user_slug", function(req, res, next){
 				address: user.address
 			}},
 			function(err, user) {
-				console.log(user);
 				if (err) { return res.status(404).send(err); }
 				res.status(200).send("successfully change details");
 			}

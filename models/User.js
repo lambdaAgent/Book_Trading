@@ -14,8 +14,7 @@ var userSchema = mongoose.Schema({
 	slug: {type: String},
 	email : {type: String, required: true},
 	book: [{ type: mongoose.Schema.Types.ObjectId, ref:"Book" }],
-	tradeProposal:[{type: mongoose.Schema.Types.ObjectId, ref:"TradeProposal"}],
-	acceptProposal: [{ type: mongoose.Schema.Types.ObjectId, ref:"User" }],
+	tradeTransaction:[{type: mongoose.Schema.Types.ObjectId, ref:"tradeTransaction"}],
 	joined_at: {type: Date, default: Date.now}
 
 });
